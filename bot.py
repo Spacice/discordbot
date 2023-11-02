@@ -1,9 +1,9 @@
-import discord
 from discord.ext import commands
 from config import settings
 from config import ilyusURL
-from time import sleep
 import logging
+
+from Game import *
 
 #Логгер
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
@@ -14,6 +14,7 @@ intents.message_content = True
 intents.members = True
 intents.presences = True
 bot = commands.Bot(command_prefix = settings['prefix'], intents=intents)
+game = Game(bot)
 
 def getOnlineList(guild):
     onlineList = ''
@@ -48,19 +49,21 @@ async def online(ctx):
 @bot.command()
 async def hello(ctx):
     author = ctx.message.author
-
     await ctx.send(f'Привет, {author.mention}!')
 
-@bot.command(name='penis', description="Отправляет противную фотографию")
+@bot.command()
+@commands.has_permissions(administrator = True)
+async def start(ctx):
+    ch = bot.get_channel(gameChannels['lobbyVoiceChannelID']) #лобби
+    await ctx.send(f'Игра запущена')
+    await ctx.send(f'На данный момент в лобби ' + str(len(ch.members)) + ' игроков')
+    await game.checkLobbyLoop.start()
+
+@bot.command(description="Отправляет противную фотографию")#Локальный мем
 async def пенис(ctx):
     embed = discord.Embed(color=0xff9900, title='Ильюс наблевал')  # Создание Embed'a
     embed.set_image(url=ilyusURL)
     await ctx.send(embed=embed)
 
-'''@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-    await message.channel.send(f'{str(message.author.mention)}, иди нахуй!')'''
-
 bot.run(settings['token'], log_handler=handler, log_level=logging.DEBUG)
+
