@@ -3,3 +3,5 @@
 /workspace.xml
 /config.py
 /discord.log
+/__pycache__
+/.idea
